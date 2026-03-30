@@ -20,7 +20,7 @@ class InputField // shape, событие нажатия по фигуре, от
 public:
 	// Удобно разграничить функционал конструктора следующим образом: инициализацию производить в значениях по умолчанию, а настраивать объекты в теле конструктора
 	//			шрифт,				 подпись к полю ввода,		позиция в окне,		размер
-	InputField(const sf::Font& font, sf::String caption, sf::Vector2f position, sf::Vector2f size) : captionText(font, caption, 18), valueText(font, L"Я пример", 18) 
+	InputField(const sf::Font& font, sf::String caption, sf::String placeholder, sf::Vector2f position, sf::Vector2f size) : captionText(font, caption, 18), valueText(font, placeholder, 18), placeholderText(placeholder)
 	{
 		// fieldShape
 		fieldShape.setPosition(position);
@@ -84,7 +84,16 @@ public:
 	// Функция отрисовки, принимающая ссылку на графическое окно
 	void Draw(sf::RenderWindow& renderWindow)
 	{
-		valueText.setString(valueString);
+		if (valueString.isEmpty())
+		{
+			valueText.setString(placeholderText);
+			valueText.setFillColor(sf::Color(CHARCOAL_BROWN_COLOR.r, CHARCOAL_BROWN_COLOR.g, CHARCOAL_BROWN_COLOR.b, 130));
+		}
+		else
+		{
+			valueText.setString(valueString);
+			valueText.setFillColor(sf::Color(CHARCOAL_BROWN_COLOR));
+		}
 		renderWindow.draw(captionText);
 		renderWindow.draw(fieldShape);
 		renderWindow.draw(valueText);
@@ -97,6 +106,7 @@ private:
 	sf::Text valueText;
 	// Прочие элементы
 	sf::String valueString;
+	sf::String placeholderText;
 	bool isActive = false;
 	unsigned int maxLength = 32;
 };
@@ -164,6 +174,9 @@ int main()
 	sf::Text statusText(font, "", 18);
 	statusText.setFillColor(sf::Color(CHARCOAL_BROWN_COLOR));
 	statusText.setPosition({ 90.0f, 540.0f });
+	sf::Text instructionText(font, L"Добавьте книгу: заполните поля и нажмите кнопку", 18);
+	instructionText.setFillColor(sf::Color(CHARCOAL_BROWN_COLOR));
+	instructionText.setPosition({ 20.0f, 40.0f });
 	// Объекты для статуса добавления книги
 	sf::String statusMessage;
 	bool showStatus = false;
@@ -180,9 +193,9 @@ int main()
 
 	// Размер по x - количество букв * 10
 													// Размер по y - размер символа * 2
-	InputField bookTitleField(font, L"Название книги", { 20.0f, 100.0f }, { 320.0f, 36.f });
-	InputField authorField(font, L"Автор книги", { 20.0f, 200.0f }, { 320.0f, 36.f });
-	InputField yearField(font, L"Год издания", { 20.0f, 300.0f }, { 320.0f, 36.f });
+	InputField bookTitleField(font, L"Название книги", L"Введите название книги", { 20.0f, 100.0f }, { 320.0f, 36.f });
+	InputField authorField(font, L"Автор книги", L"Введите автора", { 20.0f, 200.0f }, { 320.0f, 36.f });
+	InputField yearField(font, L"Год издания", L"Введите год издания", { 20.0f, 300.0f }, { 320.0f, 36.f });
 
 	auto AddBook = [&]()
 		{
@@ -271,6 +284,7 @@ int main()
 		// ---------------Отрисовка элементов---------------
 		mainWindow.draw(leftPanel);
 		mainWindow.draw(rightPanel);
+		mainWindow.draw(instructionText);
 		authorField.Draw(mainWindow);
 		yearField.Draw(mainWindow);
 		bookTitleField.Draw(mainWindow);
