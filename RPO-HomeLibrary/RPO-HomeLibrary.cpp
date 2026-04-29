@@ -1,6 +1,7 @@
 ﻿#include <SFML/Graphics.hpp>
 #include <vector>
 #include <iostream>
+#include <cwctype>
 
 const sf::Color ROSY_GRANITE_COLOR = { 163, 149, 148 };
 const sf::Color EGGSHELL_COLOR = { 237, 235, 215 };
@@ -14,6 +15,33 @@ struct Book
 	sf::String author;
 	sf::String year;
 };
+
+static sf::String ToLowerString(const sf::String& value)
+{
+	sf::String normalized = value;
+	for (std::size_t i = 0; i < normalized.getSize(); ++i)
+	{
+		normalized[i] = static_cast<char32_t>(std::towlower(static_cast<wchar_t>(normalized[i])));
+	}
+	return normalized;
+}
+
+static std::vector<Book> FilterVisibleBooks(const std::vector<Book>& books, const sf::String& searchText)
+{
+	sf::String normalizedSearchText = ToLowerString(searchText);
+	std::vector<Book> visibleBooks;
+	for (const Book& book : books)
+	{
+		sf::String normalizedTitle = ToLowerString(book.title);
+		sf::String normalizedAuthor = ToLowerString(book.author);
+		sf::String normalizedYear = ToLowerString(book.year);
+		if (normalizedSearchText.isEmpty() || normalizedTitle.find(normalizedSearchText) != sf::String::InvalidPos || normalizedAuthor.find(normalizedSearchText) != sf::String::InvalidPos || normalizedYear.find(normalizedSearchText) != sf::String::InvalidPos)
+		{
+			visibleBooks.push_back(book);
+		}
+	}
+	return visibleBooks;
+}
 // ---------------Класс поля ввода---------------
 class InputField // shape, событие нажатия по фигуре, отрисовка букв, положение, размер, get-функция по возвращению значения объекта, подпись к полю ввода
 {
